@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Blog from "./components/Blog";
+import CreateNewBlog from "./components/CreateNewBlog";
 import blogService from "./services/blogs";
 import userService from "./services/user";
 
@@ -7,14 +8,12 @@ const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [blogUrl, setBlogUrl] = useState("");
+
   const [user, setUser] = useState(null);
   const [postBlogVisible, setPostBlogVisible] = useState(false);
 
-  const showWhenVisible = postBlogVisible === true ? "" : "none";
   const hideWhenVisible = postBlogVisible === false ? "" : "none";
+  const showWhenVisible = postBlogVisible === true ? "" : "none";
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -46,25 +45,6 @@ const App = () => {
   const handleLogout = () => {
     window.localStorage.removeItem("loggedInUser");
     setUser(null);
-  };
-
-  const postBlog = async (e) => {
-    e.preventDefault();
-
-    const blogObject = {
-      title,
-      author,
-      url: blogUrl,
-    };
-    try {
-      await blogService.addBlog(blogObject);
-      blogService.getAll().then((blogs) => setBlogs(blogs));
-      setTitle("");
-      setAuthor("");
-      setBlogUrl("");
-    } catch (e) {
-      console.log(e);
-    }
   };
 
   if (user === null || user === undefined) {
@@ -112,49 +92,22 @@ const App = () => {
           create new blog
         </button>
       </div>
-      <div style={{ display: showWhenVisible }}>
-        <h3> Create New </h3>
-
-        <form onSubmit={postBlog}>
-          <div>
-            title
-            <input
-              type="text"
-              value={title}
-              name="title"
-              onChange={({ target }) => setTitle(target.value)}
-            />
-          </div>
-          <div>
-            author
-            <input
-              type="text"
-              value={author}
-              name="author"
-              onChange={({ target }) => setAuthor(target.value)}
-            />
-          </div>
-          <div>
-            URL
-            <input
-              type="text"
-              value={blogUrl}
-              name="title"
-              onChange={({ target }) => setBlogUrl(target.value)}
-            />
-          </div>
-          <button type="submit">post a blog</button>
-          <div>
-            <button
-              onClick={() => {
-                setPostBlogVisible(false);
-              }}
-            >
-              cancel
-            </button>{" "}
-          </div>
-        </form>
+      <CreateNewBlog
+        postBlogVisible={postBlogVisible}
+        showWhenVisible={showWhenVisible}
+        setBlogs={setBlogs}
+      ></CreateNewBlog>
+      <div>
+        <button
+          style={{ display: showWhenVisible }}
+          onClick={() => {
+            setPostBlogVisible(false);
+          }}
+        >
+          cancel
+        </button>{" "}
       </div>
+
       {blogs.map((blog) => (
         <Blog key={blog.id} blog={blog} />
       ))}
